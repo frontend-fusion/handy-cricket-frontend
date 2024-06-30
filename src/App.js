@@ -4,7 +4,7 @@ import ParticlesComponent from './particles';
 import './App.css';
 
 
-const socket = io('192.168.21.144:5000/')
+const socket = io('https://main--vermillion-conkies-0a38c5.netlify.app/')
 function App() {
   const [userName, setUserName] = useState([]);
   const [roomId, setRoomId] = useState('');
