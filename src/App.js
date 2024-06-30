@@ -4,7 +4,7 @@ import ParticlesComponent from './particles';
 import './App.css';
 
 
-const socket = io('https://main--vermillion-conkies-0a38c5.netlify.app/')
+const socket = io('https://handy-cricket-backend.onrender.com/')
 function App() {
   const [userName, setUserName] = useState([]);
   const [roomId, setRoomId] = useState('');
