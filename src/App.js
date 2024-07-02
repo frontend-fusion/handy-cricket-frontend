@@ -13,7 +13,12 @@ function App() {
   const [roomCreated, setRoomCreated] = useState(false);
   const [activeRooms, setActiveRooms] = useState([{}]);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [isShowError, setShowError] = useState(false);
   const setUser = () => {
+    if (!document.getElementById('name').value) {
+      setShowError(true);
+      return;
+    }
     setUserRegistered(true);
     setUserName(document.getElementById('name').value);
   }
@@ -31,11 +36,9 @@ function App() {
   const playerMove = (move) => {
     socket.emit('player move', roomId, move);
     setIsDisabled(true);
-
   }
 
   useEffect(() => {
-
     socket.on('room created', (roomId) => {
       setRoomId(roomId);
     });
@@ -65,26 +68,46 @@ function App() {
       setActiveRooms(activeRooms);
     })
     
-    socket.on('user2 won match', (winner) => {
-      alert(`${winner} won the match`);
-      setUserName('');
-      setUserRegistered(false);
-      setPlayMatch(false);
-      setRoomCreated(false);
-      setActiveRooms([]);
+    socket.on('user2 won match', (winner, roomId) => {
+      let playOneMoreMatch = window.confirm(`${winner} won the match Do you want to play one more match?`);
+      if (playOneMoreMatch) {
+        socket.emit('play again', roomId);
+      }
+      else {
+        setUserName('');
+        setUserRegistered(false);
+        setPlayMatch(false);
+        setRoomCreated(false);
+        setActiveRooms([]);
+        setIsDisabled(false);
+      }
+    })
+    
+    socket.on('restartMatch', (activeRooms) => {
+      setActiveRooms(activeRooms);
       setIsDisabled(false);
     })
 
-    socket.on('out', (winner, draw, activeRooms) => {
+    socket.on('out', (winner, draw, activeRooms, roomId) => {
       setActiveRooms(activeRooms);
-       draw ? alert('Match Draw') : alert(`${winner} won the match`);
-      setUserName('');
-      setUserRegistered(false);
-      setPlayMatch(false);
-      setRoomCreated(false);
-      setActiveRooms([]);
-      setIsDisabled(false);
-      
+      let playOneMoreMatch;
+      if (draw) {
+        playOneMoreMatch = window.confirm('Match Draw Do You want to play one more match?');
+      }
+      else {
+        playOneMoreMatch = window.confirm(`${winner} won the match Do You want to play one more match?`);
+      }
+      if (playOneMoreMatch) {
+        socket.emit('play again', roomId);
+      }
+      else {
+        setUserName('');
+        setUserRegistered(false);
+        setPlayMatch(false);
+        setRoomCreated(false);
+        setActiveRooms([]);
+        setIsDisabled(false);
+      }
     })
 
   }, []);
@@ -96,8 +119,11 @@ function App() {
           <div className='d-flex justify-content-center text-danger p-3'><h1> Hand Cricket </h1></div>
           <div className='d-flex  flex-column align-items-center justify-content-center' style={{ 'height': '70%' }}>
             <h2>Enter Name</h2>
+            <div style={{ 'height': '10%', 'width': '100%', 'display': 'grid', 'placeItems': 'center' }}>
             <input type="text" className='form-control mt-4' id='name' style={{ 'width': '30%' }} />
-            <button className='btn btn-primary mt-4' onClick={setUser}>Submit</button>
+            { isShowError && <p className='text-danger'> Please enter your name to start the game and join the excitement! </p> }
+            </div>
+            <button className='btn btn-primary mt-5' onClick={setUser}>Submit</button>
           </div>
         </>
       }
