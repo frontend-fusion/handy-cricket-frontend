@@ -72,6 +72,7 @@ function App() {
       setPlayMatch(false);
       setRoomCreated(false);
       setActiveRooms([]);
+      setIsDisabled(false);
     })
 
     socket.on('out', (winner, draw, activeRooms) => {
