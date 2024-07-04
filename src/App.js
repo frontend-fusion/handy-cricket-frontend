@@ -14,6 +14,7 @@ function App() {
   const [activeRooms, setActiveRooms] = useState([{}]);
   const [isDisabled, setIsDisabled] = useState(false);
   const [isShowError, setShowError] = useState(false);
+  const [isSelectMode, setSelectedMode] = useState(false);
   const setUser = () => {
     if (!document.getElementById('name').value) {
       setShowError(true);
@@ -36,6 +37,13 @@ function App() {
   const playerMove = (move) => {
     socket.emit('player move', roomId, move);
     setIsDisabled(true);
+  }
+  
+  const modeSelected = (mode) => {
+    setSelectedMode(true);
+    if (mode === 'singlePlayer') {
+      socket.emit('play with cpu', userName);
+    }
   }
 
   useEffect(() => {
@@ -127,16 +135,30 @@ function App() {
           </div>
         </>
       }
-
+      
       {
-        roomCreated && !playMatch && userRegistered &&
+        userRegistered && !isSelectMode &&
+        <>
+          <div className='d-flex  flex-column align-items-center justify-content-center h-100'>
+            <h1>Select Mode To Continue</h1>
+            <div>
+              <button className='btn btn-primary' onClick={() => modeSelected('singlePlayer')}>Single Player</button>
+              <button className='btn btn-primary ms-2' onClick={() => modeSelected('multiplayer')}>Multiplayer</button>
+            </div>
+          </div>
+        </>
+      }
+       
+      {
+        roomCreated && !playMatch && userRegistered && isSelectMode &&
         <div className='h-100 d-flex flex-column justify-content-center align-items-center'>
           <h1>Room Id: {roomId}</h1>
           <h1>Waiting for your friend to join</h1>
         </div>
       }
+      
 
-      {!playMatch && userRegistered && !roomCreated &&
+      {!playMatch && userRegistered && !roomCreated && isSelectMode &&
         <>
           <div className="App d-flex justify-content-center align-items-center h-100">
             <div className='d-flex flex-column'>
